@@ -17,13 +17,6 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 class DomainConfigOverride implements ConfigFactoryOverrideInterface {
 
   /**
-   * The Domain negotiator.
-   *
-   * @var \Drupal\domain\DomainNegotiatorInterface
-   */
-  protected $negotiator;
-
-  /**
    * The config factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
@@ -34,15 +27,10 @@ class DomainConfigOverride implements ConfigFactoryOverrideInterface {
    * Constructs a DomainSourcePathProcessor object.
    *
    *   The domain loader.
-   * @param \Drupal\domain\DomainNegotiatorInterface $negotiator
-   *   The domain negotiator.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The module handler service.
    */
-  public function __construct(
-      DomainNegotiatorInterface $negotiator,
-      ConfigFactoryInterface $config_factory) {
-    $this->negotiator = $negotiator;
+  public function __construct(ConfigFactoryInterface $config_factory) {
     $this->configFactory = $config_factory;
   }
 
@@ -59,7 +47,8 @@ class DomainConfigOverride implements ConfigFactoryOverrideInterface {
   public function loadOverrides($names) {
     $overrides = array();
     if (in_array('system.site', $names)) {
-      $domain = $this->negotiator->getActiveDomain();
+      $negotiator = \Drupal::service('domain.negotiator');
+      $domain = $negotiator->getActiveDomain();
       if (!empty($domain)) {
         $domain_key = $domain->id();
         $configFactory = $this->configFactory->get('domain_site_settings.domainconfigsettings');
